@@ -1,0 +1,6 @@
+<details class="upload reversion"><summary>换版复核 · 以 {{ manifest.id[:14] }} 为旧版</summary>
+<form id="revise" data-base="{{ manifest.id }}">
+<label>新版字幕 CSV<textarea name="cues" rows="3" required></textarea></label>
+<label>新版切版 CSV<textarea name="cuts" rows="3" required></textarea></label>
+<button>换版复核并归档</button></form>
+<p class="hint">沿用只记文字不变、交付目标帧未动、且未与新版同轨冲突相交的旧审签；换版失败保留旧版证据，同一次换版重试不新增归档。</p></details>

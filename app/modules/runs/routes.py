@@ -1,5 +1,6 @@
 from flask import Blueprint, current_app, jsonify, request
 from app.material import material
+from app.modules.revision.service import revise
 from .service import record, summary
 
 runs = Blueprint('revisions', __name__, url_prefix='/api/runs')
@@ -27,4 +28,13 @@ def detail(key):
 
 @runs.post('/<key>/repeat')
 def repeat(key):
-    return jsonify(record(archive(), archive().read(key)['original']))
+    stored = archive().read(key)
+    base_id = stored['manifest'].get('base_id')
+    base = archive().read(base_id) if base_id else None
+    return jsonify(record(archive(), stored['original'],
+                          kind=stored['manifest'].get('kind', 'original'), base=base))
+
+
+@runs.post('/<key>/revise')
+def reversion(key):
+    return jsonify(revise(archive(), key, material(request.get_json(silent=True))))

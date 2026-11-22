@@ -5,3 +5,4 @@
 - 切版 `cut,start,end,target,kind` 用左闭右开源帧区间，类型为 `KEEP` 或 `REMOVE`。`KEEP` 必须给整数目标起帧，`REMOVE` 的 `target` 留空。源区间或目标区间重叠使整份切版失败。切版未覆盖区间是 `GAP`，即待证。
 - 连续目标坐标为 `target + (源坐标 - start) × 1001/1250`。交付帧序号为落在区间内的整数网格点，因此两个端点都向上取整。显示出的目标重叠按轨道对交付整数帧做扫描线，重叠深度大于等于两条的每一帧只计一次。
 - 源覆盖在同一轨内取并集，再对不同轨道累加。所有源帧量用十进制整数字符串或 `分子/分母`。原覆盖 = 已交付源覆盖 + 剪辑移除 + 待证。时码无效或身份矛盾无法估时，行数单计。证据 JSON 含原件、行证、散列、规则版本及归档 UTC。
+- 换版档案 `kind=revision`，另记 `base_id`、`base_result_sha256` 与 `review_rules`。复核行以「轨道 + 字幕号」对齐新旧版：`state` 为 `carried`（沿用旧审签）、`pending`（待复核）或 `retired`（旧审签退出）。`carried` 要求旧版该行本来已签发、`text` 一致、交付目标帧区间 `base_ranges` 与 `ranges` 相同且未卷进新版新增同轨冲突；`checks` 逐项记这三个条件。其余行给 `reasons`：`NEW`、`NO_APPROVAL`、`TEXT`、`MOVED`、`NOT_DELIVERED`、`GAP`、`CONFLICT`、`ISOLATED`、`RETIRED`。换版档号按 `版本 + 复核规则 + 旧版档号 + 原件散列` 生成，同一旧版同一原件重试复用同档，不新增归档；换版失败不写出任何新档，旧版保持可签发。

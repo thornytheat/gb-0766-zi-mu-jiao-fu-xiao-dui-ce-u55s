@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, render_template, request
-from .grid_view import HEADERS, LABELS, cells
+from .grid_view import HEADERS, LABELS, REASONS, STATES, cells
 from .material import example, material
 from .modules.delivery.checks import verify
 from .modules.delivery.service import CODES
@@ -9,7 +9,8 @@ from .problems import Rejection
 
 sheets = Blueprint('sheets', __name__)
 TABS = {'source': '文件采信', 'clock': '帧率校核', 'edits': '切版映射', 'overlaps': '冲突定位',
-        'balance': '覆盖对账', 'runs': '版本归档', 'delivery': '交付签发'}
+        'balance': '覆盖对账', 'runs': '版本归档', 'revision': '换版复核', 'delivery': '交付签发'}
+PREVIEW = tuple(TABS)[:5]
 
 
 def current():
@@ -23,7 +24,7 @@ def current():
 
 @sheets.get('/api/check/<sheet>')
 def data(sheet):
-    if sheet not in tuple(TABS)[:5]:
+    if sheet not in PREVIEW:
         raise Rejection('NO_SHEET', '未找到校对页', 404)
     key = request.args.get('run')
     if key:
@@ -33,7 +34,7 @@ def data(sheet):
 
 @sheets.post('/api/check/<sheet>')
 def check_originals(sheet):
-    if sheet not in tuple(TABS)[:5]:
+    if sheet not in PREVIEW:
         raise Rejection('NO_SHEET', '未找到校对页', 404)
     return jsonify(inspect(material(request.get_json(silent=True)), until=sheet))
 
@@ -45,7 +46,10 @@ def grid(sheet):
         raise Rejection('NO_SHEET', '未找到校对页', 404)
     stages, manifest, sample = current()
     if sheet == 'delivery' and manifest:
-        verify(archive().read(manifest['id']))
+        verify(archive().read(manifest['id']), archive())
+    review = stages.get('revision')
     return render_template('workbook.html', sheet=sheet, tabs=TABS, sample=sample, manifest=manifest,
                            totals=stages['balance']['counts'], rows=cells(stages, sheet, archive(), manifest),
-                           columns=HEADERS[sheet], labels=LABELS, codes=CODES)
+                           review=dict(counts=review['counts'], rules=review['rules'], base_id=review['base_id'])
+                           if review else None,
+                           columns=HEADERS[sheet], labels=LABELS, codes=CODES, states=STATES, reasons=REASONS)

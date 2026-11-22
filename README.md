@@ -9,10 +9,11 @@
 - 首页检查 C101 跨三段，C103 在 B-01 与 B-02 间留下 200 源帧缺证。网格支持方向键和鼠标选格。
 - 帧率校核查 C105 的非法丢帧号。冲突定位查三条字幕同占 28 个目标帧，覆盖账中重叠另外记录。
 - 文件采信可提交自有 CSV。归档校对后，在版本归档复算，在交付签发下载一份 JSON 证据包。
+- 换版复核：在版本归档打开任一旧版，于换版复核页提交新版字幕与切版。切段改号、移帧或同轨冲突变化都会把相关行列为待复核，只有文字与交付帧都没动的旧审签沿用；失败时旧版证据原样保留，同一次换版重试不新增归档。
 
 ## API
 
-`POST /api/runs` 接受 `{"sample":"dirty"}`、`{"sample":"clean"}` 或含 `cues` 与 `cuts` CSV 文本的 JSON。`GET /api/check/<sheet>` 查 `source`、`clock`、`edits`、`overlaps`、`balance`，用 `run` 查询归档或用 `sample` 预览。归档详情 `GET /api/runs/<id>`，复算 `POST /api/runs/<id>/repeat`，下载 `GET /api/delivery/<id>/export`。
+`POST /api/runs` 接受 `{"sample":"dirty"}`、`{"sample":"clean"}` 或含 `cues` 与 `cuts` CSV 文本的 JSON。`GET /api/check/<sheet>` 查 `source`、`clock`、`edits`、`overlaps`、`balance`，用 `run` 查询归档或用 `sample` 预览。归档详情 `GET /api/runs/<id>`，复算 `POST /api/runs/<id>/repeat`，换版复核 `POST /api/runs/<id>/revise`（请求体同上，须指向已归档旧版），下载 `GET /api/delivery/<id>/export`。换版档的导出含 `review` 明细：`carried` 记沿用旧审签的行，`pending` 记必须重审的行及依据码，`retired` 记新版已退出的旧审签。
 
 [数据定义](docs/DATA-DICTIONARY.md) · [深度登记](docs/DEPTH.md) · [复算例](docs/FRAME-EXAMPLE.md)
 
